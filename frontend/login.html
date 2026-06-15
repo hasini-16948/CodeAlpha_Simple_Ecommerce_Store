@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ShopZone - Login Gateway</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-body-container">
+    <div class="auth-wrapper-box">
+        <svg class="auth-logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M35 35V28C35 19.7157 41.7157 13 50 13V13C58.2843 13 65 19.7157 65 28V35" stroke="#5c54c4" stroke-width="6" stroke-linecap="round"/>
+            <rect x="20" y="32" width="60" height="55" rx="10" fill="#5c54c4"/>
+            <path d="M30 48L45 65L80 34" stroke="#ff6b6b" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        
+        <h2 id="form-heading">ShopZone</h2>
+        <p id="form-subtext">Register to continue shopping</p>
+
+        <form id="auth-core-form" onsubmit="submitAuthForm(event)">
+            <div class="field-group">
+                <label id="user-label">NAME</label>
+                <input type="text" id="auth-user" required placeholder="Enter name">
+            </div>
+            <div class="field-group" id="email-group-box">
+                <label>EMAIL</label>
+                <input type="email" id="auth-email" placeholder="Enter email example@gmail.com">
+            </div>
+            <div class="field-group">
+                <label>PASSWORD</label>
+                <input type="password" id="auth-pass" required placeholder="Enter password">
+            </div>
+            <button type="submit" class="auth-action-btn" id="submit-btn-text">Register / Login</button>
+        </form>
+
+        <div class="switch-mode-text">
+            <div id="toggle-hint">Already have an account? <span onclick="toggleMode()">Login here</span></div>
+        </div>
+    </div>
+
+    <script>
+        let modeIsLogin = false; // Default presentation view layout: Registration
+
+        function toggleMode() {
+            modeIsLogin = !modeIsLogin;
+            document.getElementById('form-subtext').textContent = modeIsLogin ? 'Login to continue shopping' : 'Register to continue shopping';
+            document.getElementById('user-label').textContent = modeIsLogin ? 'USERNAME' : 'NAME';
+            document.getElementById('auth-user').placeholder = modeIsLogin ? 'Enter username' : 'Enter name';
+            document.getElementById('email-group-box').style.display = modeIsLogin ? 'none' : 'block';
+            document.getElementById('submit-btn-text').textContent = modeIsLogin ? 'Login' : 'Register / Login';
+            document.getElementById('toggle-hint').innerHTML = modeIsLogin ? 
+                `Don't have an account? <span onclick="toggleMode()">Register here</span>` : 
+                `Already have an account? <span onclick="toggleMode()">Login here</span>`;
+        }
+
+        function triggerInstantLogin(user, pass) {
+            fetch(`http://localhost:5000/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: user.toLowerCase(), password: pass })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    localStorage.setItem('shopzone_token', data.token);
+                    localStorage.setItem('shopzone_username', data.username);
+                    window.location.href = 'index.html'; // Direct dashboard view entry
+                }
+            })
+            .catch(err => console.error("Silent authentication bypass failed:", err));
+        }
+
+        function submitAuthForm(e) {
+            e.preventDefault();
+            const username = document.getElementById('auth-user').value.trim();
+            const password = document.getElementById('auth-pass').value;
+            const email = document.getElementById('auth-email') ? document.getElementById('auth-email').value.trim() : '';
+            
+            const targetRoute = modeIsLogin ? 'login' : 'register';
+            const payload = modeIsLogin ? { username, password } : { username, email, password };
+
+            fetch(`http://localhost:5000/api/${targetRoute}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    if(modeIsLogin) {
+                        localStorage.setItem('shopzone_token', data.token);
+                        localStorage.setItem('shopzone_username', data.username);
+                        window.location.href = 'index.html'; // Old users routed inside directly
+                    } else {
+                        // New users automatically transition into the application without alerting loops
+                        triggerInstantLogin(username, password);
+                    }
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(err => console.error("Auth submit error:", err));
+        }
+    </script>
+</body>
+</html>
