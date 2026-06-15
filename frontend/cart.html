@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ShopZone - Cart</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo" onclick="window.location.href='index.html'">ShopZone</div>
+        <nav id="navbar-links"></nav>
+    </header>
+
+    <div class="store-container" style="max-width: 900px;">
+        <div class="back-link" onclick="window.location.href='index.html'">← Continue Shopping</div>
+        <h2 style="margin-bottom:20px;">My Shopping Cart</h2>
+        
+        <table class="cart-ledger-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody id="cart-table-body"></tbody>
+        </table>
+
+        <div style="text-align: right; margin-top:30px; background:white; padding:20px; border-radius:8px; border:1px solid var(--border-soft);">
+            <h3 style="font-size:16px; color:var(--txt-muted); margin-bottom:5px;">Total Amount:</h3>
+            <div id="grand-total" style="font-size:26px; font-weight:bold; margin-bottom:15px;">₹0</div>
+            
+            <button type="button" class="btn-primary-action" style="padding:10px 30px;" onclick="processCheckout(event)">Place Order</button>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
